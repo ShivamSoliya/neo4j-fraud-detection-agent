@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "langgraph-fraud-detection"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "langchain>=0.3.25",
+    "langchain-mcp-adapters>=0.1.7",
+    "langgraph>=0.4.8",
+    "neo4j>=5.28.1",
+    "python-dotenv>=1.1.0",
+    "mcp-neo4j-cypher>=0.2.3"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agents", "core", "prompts", "tools"]
+exclude = []
