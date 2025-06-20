@@ -1,11 +1,11 @@
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
-from core.state import MessagesState # Use the extended MessagesState
+from langgraph.graph import StateGraph
 from tools.mcp_tools import get_all_mcp_tools # Import the function to get tools
 import logging
-from config import OPENAI_API_KEY
+from config.config import GOOGLE_API_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +16,9 @@ class Neo4jFraudDetectorAgent:
     """
 
     def __init__(self):
-        if not OPENAI_API_KEY:
-            raise ValueError("OPENAI_API_KEY is not set.")
-        self.model = ChatOpenAI(api_key=OPENAI_API_KEY, model="gpt-4o-mini", temperature=0.1)
+        if not GOOGLE_API_KEY:
+            raise ValueError("GOOGLE_API_KEY is not set.")
+        self.model = ChatGoogleGenerativeAI(api_key=GOOGLE_API_KEY, model="gemini-2.0-flash", temperature=0.1)
 
         # Tools are loaded async in main and passed, or loaded once here if synchronous
         # For simplicity in this agent's __init__, we'll assume tools are available later.
@@ -37,8 +37,7 @@ class Neo4jFraudDetectorAgent:
         else:
             logger.info(f"Neo4jFraudDetectorAgent initialized with {len(self.tools)} tools.")
 
-    async def run(self, state: MessagesState) -> MessagesState:
-        logger.info(f"Neo4jFraudDetectorAgent: Processing messages...")
+    async def create_agent(self) -> StateGraph:
 
         if not self.tools:
             await self.initialize_tools()
@@ -48,9 +47,8 @@ class Neo4jFraudDetectorAgent:
             tools=self.tools,
             prompt=SystemMessage(content=self.system_prompt_template),
             checkpointer=self.checkpointer,
+            # interrupt_before=["write_neo4j_cypher"],
             name="neo4j_fraud_detector_agent",
         )
 
         return neo4j_fraud_detector_agent
-
-neo4j_fraud_detector_agent = Neo4jFraudDetectorAgent()

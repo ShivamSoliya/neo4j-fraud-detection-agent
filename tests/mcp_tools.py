@@ -1,14 +1,13 @@
-import sys
-from pathlib import Path
+"""
+This script tests the MCP tools by retrieving and printing them.
+"""
+
 import logging
 import asyncio
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Add the project root directory to sys.path
-sys.path.append(str(Path(__file__).parent.parent))
 
 from tools.mcp_tools import *
 

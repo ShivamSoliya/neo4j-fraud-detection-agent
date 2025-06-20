@@ -14,10 +14,13 @@ dependencies = [
     "langgraph>=0.4.8",
     "neo4j>=5.28.1",
     "python-dotenv>=1.1.0",
-    "mcp-neo4j-cypher>=0.2.3"
+    "mcp-neo4j-cypher>=0.2.3",
+    "langchain-google-genai",
+    "langgraph_supervisor",
+    "streamlit>=1.42.0"
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["agents", "core", "prompts", "tools"]
+include = ["agents", "core", "prompts", "tools", "tests"]
 exclude = []
