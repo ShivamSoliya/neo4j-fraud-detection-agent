@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "langgraph-fraud-detection"
 version = "0.1.0"
-description = "Add your description here"
+description = "LangGraph based fraud detection system"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "langchain>=0.3.25",
     "langchain-mcp-adapters>=0.1.7",
@@ -16,8 +16,8 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "mcp-neo4j-cypher>=0.2.3",
     "langchain-google-genai",
-    "langgraph_supervisor",
-    "streamlit>=1.42.0"
+    "langgraph-swarm",
+    "langmem",
 ]
 
 [tool.setuptools.packages.find]
