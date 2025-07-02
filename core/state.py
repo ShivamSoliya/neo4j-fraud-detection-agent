@@ -17,6 +17,5 @@ class State(AgentState):
     ```
     Additional attributes:
     """
-    context: dict[str, Any]
-    llm_input_messages: list[BaseMessage]
-    active_agent: str # This key will store the summarized messages, intended for the LLM input. It does not need the 'add_messages' reducer if SummarizationNode overwrites it.
+    trimmed_messages: list[BaseMessage]
+    active_agent: str

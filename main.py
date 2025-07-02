@@ -9,22 +9,31 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 async def stream_messages(app: CompiledGraph, user_input: str, user_thread_id: uuid.UUID):
-    full_response_content = ""
+    print("Assistant: ", end="")
 
     async for message in app.astream(
         {"messages": [
-            {"role": "user", 
-            "content": user_input}
-            ]}, 
-            {"configurable": {
-                "thread_id": str(user_thread_id)  # Convert UUID to string
-            }},
-            stream_mode="messages"):
+            {"role": "user", "content": user_input}
+        ]},
+        {"configurable": {"thread_id": str(user_thread_id)}},
+        stream_mode="messages"
+    ):
+        msg = message[0]
 
-            if message[0].content:
-                full_response_content += message[0].content
-    
-    return full_response_content
+        # Add normal content if present
+        if msg.content and msg.type not in ("tool"):
+            print(msg.content, end="")
+
+        # Add tool call info if present
+        func_call = msg.additional_kwargs.get("function_call")
+        if func_call:
+            func_name = func_call.get("name", "unknown_function")
+            func_args = func_call.get("arguments", "{}")
+            print(f"Tool call: {func_name} | args: {func_args}\n", end="")
+        
+        # Add tool result if this is a tool message
+        if msg.type == "tool":
+            print(f"Tool result: {msg.content}\n", end="")
 
 async def run_fraud_detection_workflow():
     """
@@ -41,9 +50,7 @@ async def run_fraud_detection_workflow():
             print("Goodbye!\n")
             break
 
-        full_response_content = await stream_messages(app, user_input, user_thread_id)
-
-        print("Assistant: ", full_response_content)
+        await stream_messages(app, user_input, user_thread_id)
 
 if __name__ == "__main__":
     asyncio.run(run_fraud_detection_workflow())

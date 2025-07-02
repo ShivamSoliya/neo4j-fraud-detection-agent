@@ -2,6 +2,39 @@ from langmem.short_term import SummarizationNode, summarize_messages, asummarize
 from langchain_core.messages import ToolMessage, SystemMessage, HumanMessage, AIMessage
 from typing import Any
 from pydantic import BaseModel
+from langgraph.utils.runnable import RunnableCallable
+
+class TrimMessagesNode(RunnableCallable):
+    def __init__(self, max_messages: int = 10, include_system: bool = True) -> None:
+        self.max_messages = max_messages
+        self.include_system = include_system
+        super().__init__(self._func, self._afunc, name="trim_messages")
+
+    def _func(self, input: dict[str, Any] | BaseModel)-> dict[str, Any]:
+        return self._trim_messages(input)
+
+    async def _afunc(self, input: dict[str, Any] | BaseModel)-> dict[str, Any]:
+        return self._trim_messages(input)
+
+    def _trim_messages(self, input):
+        system_messages = [m for m in input["messages"] if m.type == "system"] if self.include_system else []
+        other_messages = [m for m in input["messages"] if m.type != "system"]
+        
+        total_messages = len(other_messages)
+
+        # If fewer than max_messages exist, take whatever is available
+        if total_messages <= self.max_messages:
+            return {"trimmed_messages": input["messages"]}
+
+        start_idx = total_messages - self.max_messages
+        last_n_messages = other_messages[start_idx:]
+
+        # If first message isn’t human, move start_idx back while possible
+        while start_idx > 0 and last_n_messages[0].type != "human":
+            start_idx -= 1
+            last_n_messages = other_messages[start_idx:start_idx + self.max_messages]
+
+        return {"trimmed_messages": system_messages + last_n_messages}
 
 class CustomSummarizationNode(SummarizationNode):
     def _func(self, input: dict[str, Any] | BaseModel) -> dict[str, Any]:

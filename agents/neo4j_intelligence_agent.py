@@ -8,8 +8,7 @@ import logging
 from config.config import GOOGLE_API_KEY, INTELLIGENCE_AGENT, FRAUD_DETECTOR_AGENT
 from prompts.prompt import INTELLIGENCE_PROMPT
 from core.state import State
-from agents.summarizer import CustomSummarizationNode
-from langchain_core.messages.utils import count_tokens_approximately
+from utils.message_utils import TrimMessagesNode
 
 logger = logging.getLogger(__name__)
 
@@ -39,30 +38,16 @@ class Neo4jIntelligenceAgent:
         self.tools.append(transfer_to_fraud_detector_agent)
 
         logger.info(f"Neo4jIntelligenceAgent initialized with {len(self.tools)} tools.")
-    
+
     async def create_agent(self) -> CompiledGraph:
         if not self.tools:
             await self.initialize_tools()
-
-        # This function will be added as a new node in ReAct agent graph
-        # that will run every time before the node that calls the LLM.
-        # The messages returned by this function will be the input to the LLM.
-        summarization_node = CustomSummarizationNode(
-            token_counter=count_tokens_approximately,
-            model=self.model.bind(generation_config={"max_output_tokens": 256}),
-            max_tokens_before_summary=512,
-            max_tokens=256,
-            max_summary_tokens=128,
-            input_messages_key="messages",
-            output_messages_key="llm_input_messages",
-            name=f"{self.name}_summarization",
-        )
 
         neo4j_intelligence_agent = create_react_agent(
             model=self.model,
             tools=self.tools,
             prompt=SystemMessage(content=self.system_prompt),
-            pre_model_hook=summarization_node,
+            pre_model_hook=TrimMessagesNode(max_messages=5, include_system=True),
             state_schema=State,
             name=self.name,
         )
