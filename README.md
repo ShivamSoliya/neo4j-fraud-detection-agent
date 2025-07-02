@@ -14,9 +14,9 @@ A LangGraph-based intelligent agent system for detecting fraud patterns in Neo4j
 
 ## Setup
 
-1. Install dependencies:
+1. Install dependencies using uv:
 ```bash
-pip install -r requirements.txt
+uv pip install .
 ```
 
 2. Configure:
@@ -25,7 +25,7 @@ pip install -r requirements.txt
 
 3. Run:
 ```bash
-python main.py
+uv run main.py
 ```
 
 ## Usage
