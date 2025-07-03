@@ -44,6 +44,7 @@ langgraph_fraud_detection/
 ├── core/            # Core application logic
 ├── prompts/         # Prompt templates
 ├── tests/           # Test files
+├── tools/           # MCP tools
 └── utils/           # Utility functions
 ```
 
